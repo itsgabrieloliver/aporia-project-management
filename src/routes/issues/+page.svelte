@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { createIssueRequest, boardToggleRequest, closeRequest } from '$lib/stores/shortcuts';
 	import Icon from '$lib/components/Icon.svelte';
 	import StatusIcon from '$lib/components/StatusIcon.svelte';
 	import PriorityIcon from '$lib/components/PriorityIcon.svelte';
@@ -64,6 +65,35 @@
 		'canceled'
 	];
 	const priorityOptions: IssuePriority[] = ['urgent', 'high', 'medium', 'low', 'none'];
+
+	// The "C" and "B" global shortcuts fire these counters from the layout so
+	// this page can react even though it is already mounted (no navigation).
+	let seenCreate = $state<number | null>(null);
+	let seenBoard = $state<number | null>(null);
+
+	$effect(() => {
+		const n = $createIssueRequest;
+		if (seenCreate === null) {
+			seenCreate = n;
+			return;
+		}
+		if (n !== seenCreate) {
+			seenCreate = n;
+			createOpen = true;
+		}
+	});
+
+	$effect(() => {
+		const n = $boardToggleRequest;
+		if (seenBoard === null) {
+			seenBoard = n;
+			return;
+		}
+		if (n !== seenBoard) {
+			seenBoard = n;
+			view = view === 'list' ? 'board' : 'list';
+		}
+	});
 </script>
 
 <svelte:head>
@@ -282,7 +312,7 @@
 					<span class="row-labels">
 						{#each issue.labelIds as id}
 							{@const label = labelById.get(id)}
-							{#if label}<LabelChip name={label.name} color={label.colorToken} />{/if}
+							<LabelChip {label} />
 						{/each}
 					</span>
 
@@ -353,7 +383,7 @@
 									<div class="card-labels">
 										{#each issue.labelIds as id}
 											{@const label = labelById.get(id)}
-											{#if label}<LabelChip name={label.name} color={label.colorToken} />{/if}
+											<LabelChip {label} />
 										{/each}
 									</div>
 									<div class="card-foot">

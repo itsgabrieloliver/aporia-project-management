@@ -34,7 +34,8 @@
 		{ id: 'n-projects', title: 'Go to projects', hint: 'G then P', icon: 'project', href: '/projects', group: 'Navigate' },
 		{ id: 'n-releases', title: 'Go to releases', hint: 'G then R', icon: 'release', href: '/releases', group: 'Navigate' },
 		{ id: 'n-team', title: 'Go to team', hint: 'G then T', icon: 'team', href: '/team', group: 'Navigate' },
-		{ id: 'n-board', title: 'Open issue board', hint: 'B', icon: 'board', href: '/issues?view=board', group: 'Navigate' }
+		{ id: 'n-board', title: 'Toggle list / board view', hint: 'B', icon: 'board', href: '/issues?view=board', group: 'Navigate' },
+		{ id: 'n-create', title: 'Create issue', hint: 'C', icon: 'plus', href: '/issues?new=1', group: 'Navigate' }
 	];
 
 	const all = $derived([

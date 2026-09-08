@@ -4,7 +4,7 @@ version = 1
 name = "aporia"
 
 [[frames]]
-name = "aporia-web"
+name = "default"
 stack = "sveltekit"
 port = 3000
 replicas = 1
@@ -14,7 +14,7 @@ name = "aporia-app-db"
 kind = "database"
 engine = "mongodb"
 storage_gb = 10
-inject_into = "aporia-web"
+inject_into = "default"
 inject_as = "DATABASE_URL"
 
 [[frames]]
@@ -22,5 +22,5 @@ name = "aporia-cache"
 kind = "database"
 engine = "redis"
 storage_gb = 1
-inject_into = "aporia-web"
+inject_into = "default"
 inject_as = "REDIS_URL"

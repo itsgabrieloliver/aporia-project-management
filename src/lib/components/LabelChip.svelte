@@ -2,15 +2,23 @@
 	import type { Label } from '$lib/types';
 
 	interface Props {
-		label: Label;
+		label?: Label | null;
+		name?: string;
+		color?: string;
 	}
 
-	let { label }: Props = $props();
+	let { label, name, color }: Props = $props();
+
+	// Support both the label object and individual name/color props
+	const displayName = label?.name ?? name;
+	const displayColor = label?.colorToken ?? color ?? 'var(--brown-500)';
 </script>
 
-<span class="chip" style="--chip-color: {label.colorToken}">
-	<span class="chip-dot" aria-hidden="true"></span>{label.name}
-</span>
+{#if displayName}
+	<span class="chip" style="--chip-color: {displayColor}">
+		<span class="chip-dot" aria-hidden="true"></span>{displayName}
+	</span>
+{/if}
 
 <style>
 	.chip {

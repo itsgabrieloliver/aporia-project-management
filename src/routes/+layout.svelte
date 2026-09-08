@@ -5,6 +5,8 @@
 	import Icon from '$lib/components/Icon.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
 	import CommandPalette from '$lib/components/CommandPalette.svelte';
+	import { goto } from '$app/navigation';
+	import { createIssueRequest, boardToggleRequest, closeRequest } from '$lib/stores/shortcuts';
 	import type { NavItem } from '$lib/icons';
 	import type { LayoutData } from './$types';
 
@@ -75,11 +77,30 @@
 		applyTheme(theme === 'dark' ? 'light' : 'dark');
 	}
 
+	/** "g" prefix state for two-key nav shortcuts (g then d/i/p/r/t). */
+	let gPending = $state(false);
+	let gTimer: ReturnType<typeof setTimeout> | undefined;
+
+	const GO_ROUTES: Record<string, string> = {
+		d: '/',
+		i: '/issues',
+		p: '/projects',
+		r: '/releases',
+		t: '/team'
+	};
+
+	function clearGPending() {
+		gPending = false;
+		if (gTimer) clearTimeout(gTimer);
+		gTimer = undefined;
+	}
+
 	function onKeydown(event: KeyboardEvent) {
 		const target = event.target as HTMLElement | null;
 		const typing =
 			target instanceof HTMLInputElement ||
 			target instanceof HTMLTextAreaElement ||
+			target instanceof HTMLSelectElement ||
 			target?.isContentEditable === true;
 
 		if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
@@ -87,10 +108,62 @@
 			paletteOpen = true;
 			return;
 		}
+
+		if (event.key === 'Escape') {
+			clearGPending();
+			if (paletteOpen) {
+				paletteOpen = false;
+				return;
+			}
+			if (sidebarOpen) {
+				sidebarOpen = false;
+				return;
+			}
+			closeRequest.update((n) => n + 1);
+			return;
+		}
+
 		if (typing || event.metaKey || event.ctrlKey || event.altKey) return;
+
 		if (event.key === '/') {
 			event.preventDefault();
 			paletteOpen = true;
+			return;
+		}
+
+		if (gPending) {
+			const key = event.key.toLowerCase();
+			const href = GO_ROUTES[key];
+			clearGPending();
+			if (href) {
+				event.preventDefault();
+				goto(href);
+			}
+			return;
+		}
+
+		if (event.key.toLowerCase() === 'g') {
+			gPending = true;
+			gTimer = setTimeout(clearGPending, 800);
+			return;
+		}
+
+		if (event.key.toLowerCase() === 'c') {
+			event.preventDefault();
+			if (currentPath === '/issues') {
+				createIssueRequest.update((n) => n + 1);
+			} else {
+				goto('/issues?new=1');
+			}
+			return;
+		}
+
+		if (event.key.toLowerCase() === 'b') {
+			if (currentPath === '/issues') {
+				event.preventDefault();
+				boardToggleRequest.update((n) => n + 1);
+			}
+			return;
 		}
 	}
 
